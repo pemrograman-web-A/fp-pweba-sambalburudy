@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="id" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Konten Halaman - Admin Bu Rudy</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        burudy: {
+                            red: '#B91C1C',
+                            gold: '#F59E0B',
+                            dark: '#1F2937',
+                            light: '#FEF2F2',
+                            green: '#059669' 
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        serif: ['Playfair Display', 'serif'],
+                    }
+                }
+            }
+        }
+
+        const API_URL = 'content.php'; // Pastikan path ini benar!
+        const CONTENT_KEYS = ['tagline_utama', 'sub_tagline', 'deskripsi_khas', 'teks_footer'];
+
+        // READ: Memuat data konten dari API
+        async function loadContent() {
+            try {
+                const response = await fetch(API_URL);
+                
+                // Cek status HTTP 200 (OK)
+                if (!response.ok) {
+                    throw new Error(`HTTP Status: ${response.status}`);
+                }
+                
+                const contentData = await response.json();
+                
+                // Isi nilai input/textarea dengan data dari API
+                CONTENT_KEYS.forEach(key => {
+                    const element = document.getElementById(key);
+                    if (element && contentData[key] !== undefined) {
+                        element.value = contentData[key];
+                    }
+                });
+                console.log("Konten berhasil dimuat:", contentData);
+            } catch (error) {
+                // Tampilkan error yang lebih spesifik, terutama jika ada masalah CORS atau 404/500
+                alert('🔴 Error saat memuat konten: Cek API URL dan server Anda. Detail: ' + error.message);
+            }
+        }
+        
+        // UPDATE: Menyimpan konten melalui API
+        async function saveContent(key) {
+            const element = document.getElementById(key);
+            const newValue = element.value;
+
+            if (!newValue.trim()) {
+                 alert('Kolom konten tidak boleh kosong.');
+                 return;
+            }
+
+            // Membuat objek data yang hanya berisi key yang diubah
+            const dataToUpdate = {};
+            dataToUpdate[key] = newValue;
+
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(dataToUpdate),
+                });
+                
+                // Cek status HTTP
+                if (!response.ok) {
+                    const errorDetails = await response.text();
+                    throw new Error(`HTTP Status ${response.status}. Detail: ${errorDetails.substring(0, 100)}`);
+                }
+                
+                const result = await response.json();
+
+                if (result && result.message) {
+                    alert(`✅ Sukses: ${result.message}`);
+                    loadContent(); // Muat ulang data untuk memastikan konsistensi
+                } else {
+                    alert('✅ Sukses: Data diperbarui, tetapi pesan konfirmasi dari server tidak jelas.');
+                    loadContent();
+                }
+            } catch (error) {
+                alert('🔴 Error Update Konten. Pastikan method PUT diizinkan. Detail: ' + error.message);
+            }
+        }
+
+        // Panggil saat halaman selesai dimuat
+        document.addEventListener('DOMContentLoaded', loadContent);
+    </script>
+</head>
+<body class="font-sans text-burudy-dark bg-gray-100 antialiased">
+
+    <nav class="bg-burudy-dark text-white shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex-shrink-0">
+                    <span class="font-serif text-xl font-bold text-burudy-gold tracking-wide">Bu Rudy Admin</span>
+                    <span class="ml-4 text-gray-400">/ Edit Konten Halaman</span>
+                </div>
+                <a href="/admin/pages/admin.html" class="bg-burudy-red text-white px-3 py-1 rounded-full text-sm font-medium hover:bg-red-800 transition">Dashboard</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="py-12">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h1 class="text-3xl font-serif font-bold text-burudy-dark mb-8">Kelola Teks Utama Halaman Depan (READ & UPDATE)</h1>
+            
+            <div class="bg-white p-8 rounded-xl shadow-lg space-y-8">
+                
+                <div class="border-b pb-6">
+                    <h2 class="text-xl font-semibold mb-3">1. Tagline Utama</h2>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Pedasnya Nendang, Gurihnya Terngiang.</label>
+                    <textarea id="tagline_utama" rows="2" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-3 focus:border-burudy-red focus:ring focus:ring-burudy-red/50"></textarea>
+                    <button onclick="saveContent('tagline_utama')" class="mt-4 bg-burudy-gold text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-yellow-600 transition"><i class="fas fa-save mr-2"></i> Simpan Tagline</button>
+                </div>
+
+                <div class="border-b pb-6">
+                    <h2 class="text-xl font-semibold mb-3">2. Sub-Tagline</h2>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Oleh-Oleh Asli Surabaya</label>
+                    <input type="text" id="sub_tagline" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-3 focus:border-burudy-red focus:ring focus:ring-burudy-red/50">
+                    <button onclick="saveContent('sub_tagline')" class="mt-4 bg-burudy-gold text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-yellow-600 transition"><i class="fas fa-save mr-2"></i> Simpan Sub-Tagline</button>
+                </div>
+
+                <div class="border-b pb-6">
+                    <h2 class="text-xl font-semibold mb-3">3. Deskripsi Produk Khas</h2>
+                    <label class="block text-sm
