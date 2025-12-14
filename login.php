@@ -1,6 +1,6 @@
 <?php
 session_start();
-require 'config/database.php'; // Path ke config baru
+require 'config/database.php'; 
 
 if (isset($_SESSION['role'])) {
     // Redirect jika user iseng buka halaman login padahal sudah login

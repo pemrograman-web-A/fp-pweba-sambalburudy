@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profil Saya - Bu Rudy</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body class="font-sans text-gray-800 bg-gray-50 antialiased">
+    <nav class="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
+        <div class="max-w-4xl mx-auto px-4 h-16 flex justify-between items-center">
+            <a href="index.html" class="flex items-center gap-2 text-gray-500 hover:text-red-700 font-medium"><i class="fas fa-arrow-left"></i> Kembali Belanja</a>
+            <span class="font-serif text-xl font-bold">Manajemen Akun</span>
+        </div>
+    </nav>
+    <main class="py-10 px-4">
+        <div class="max-w-4xl mx-auto">
+            <div class="bg-white rounded-2xl shadow-lg p-6 mb-8 flex flex-col md:flex-row items-center gap-6 border-l-4 border-red-700 fade-in">
+                <div class="w-20 h-20 bg-red-50 rounded-full flex items-center justify-center text-3xl text-red-700"><i class="fas fa-user"></i></div>
+                <div class="text-center md:text-left flex-1">
+                    <h1 class="text-2xl font-bold" id="display-name">Loading...</h1>
+                    <p class="text-gray-500" id="display-username">@username</p>
+                </div>
+                <button onclick="handleLogout()" class="text-red-600 font-bold border border-red-200 px-4 py-2 rounded-lg hover:bg-red-50">Logout</button>
+            </div>
+            <div class="bg-white rounded-2xl shadow-lg p-8 fade-in">
+                <h2 class="text-xl font-bold mb-6 border-b pb-4">Edit Data Diri</h2>
+                <form onsubmit="saveProfile(event)" class="space-y-5">
+                    <div class="grid md:grid-cols-2 gap-5">
+                        <div><label class="block text-sm font-bold mb-1">Nama Lengkap</label><input type="text" id="input-name" class="w-full border p-3 rounded-lg bg-gray-50"></div>
+                        <div><label class="block text-sm font-bold mb-1">No HP</label><input type="text" id="input-phone" class="w-full border p-3 rounded-lg bg-gray-50"></div>
+                    </div>
+                    <div><label class="block text-sm font-bold mb-1">Email</label><input type="email" id="input-email" class="w-full border p-3 rounded-lg bg-gray-100 text-gray-400 cursor-not-allowed" readonly></div>
+                    <div><label class="block text-sm font-bold mb-1">Alamat</label><textarea id="input-address" rows="3" class="w-full border p-3 rounded-lg bg-gray-50"></textarea></div>
+                    <div class="text-right"><button type="submit" class="bg-red-700 text-white px-6 py-3 rounded-xl font-bold hover:bg-red-800 shadow-lg">Simpan Perubahan</button></div>
+                </form>
+            </div>
+        </div>
+    </main>
+    <script src="assets/js/script.js"></script>
+</body>
+</html>
