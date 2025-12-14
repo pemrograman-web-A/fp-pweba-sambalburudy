@@ -1,5 +1,4 @@
 <?php
-<<<<<<< HEAD
 // /register.php
 require 'config/database.php';
 
@@ -27,28 +26,6 @@ if (isset($_POST['register'])) {
             exit;
         } else {
             $error = "Gagal mendaftar: " . $conn->error;
-=======
-require 'koneksi.php';
-
-if (isset($_POST['register'])) {
-    $name = mysqli_real_escape_string($conn, $_POST['name']);
-    $email = mysqli_real_escape_string($conn, $_POST['email']);
-    $password = mysqli_real_escape_string($conn, $_POST['password']);
-    
-    // Hash password untuk keamanan
-    $hashed_password = password_hash($password, PASSWORD_DEFAULT);
-
-    // Cek email duplikat
-    $cek = mysqli_query($conn, "SELECT email FROM users WHERE email = '$email'");
-    if (mysqli_num_rows($cek) > 0) {
-        $error = "Email sudah terdaftar!";
-    } else {
-        $query = "INSERT INTO users (name, email, password, role) VALUES ('$name', '$email', '$hashed_password', 'user')";
-        if (mysqli_query($conn, $query)) {
-            echo "<script>alert('Pendaftaran Berhasil! Silakan Login.'); window.location='login.php';</script>";
-        } else {
-            $error = "Gagal mendaftar: " . mysqli_error($conn);
->>>>>>> origin/main
         }
     }
 }
@@ -59,11 +36,7 @@ if (isset($_POST['register'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<<<<<<< HEAD
     <title>Daftar Akun - Sambal Bu Rudy</title>
-=======
-    <title>Daftar - Sambal Bu Rudy</title>
->>>>>>> origin/main
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = { theme: { extend: { colors: { burudy: { red: "#B91C1C", gold: "#F59E0B", dark: "#1F2937" } } } } };

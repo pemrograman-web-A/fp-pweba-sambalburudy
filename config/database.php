@@ -14,8 +14,3 @@ if ($conn->connect_error) {
     die("Koneksi gagal: " . $conn->connect_error);
 }
 ?>
-
-koneksi.php
-<?php
-require_once _DIR_ . '/config/database.php';
-?>

@@ -7,6 +7,16 @@ DROP TABLE IF EXISTS `orders`;
 DROP TABLE IF EXISTS `reviews`;
 DROP TABLE IF EXISTS `products`;
 DROP TABLE IF EXISTS `settings`;
+DROP TABLE IF EXISTS `users`;
+
+CREATE TABLE `users` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `name` VARCHAR(100) NOT NULL,
+  `email` VARCHAR(100) NOT NULL UNIQUE,
+  `password` VARCHAR(255) NOT NULL,
+  `role` ENUM('user', 'admin') DEFAULT 'user',
+  `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP
+);
 
 CREATE TABLE `products` (
   `product_id` VARCHAR(10) NOT NULL,

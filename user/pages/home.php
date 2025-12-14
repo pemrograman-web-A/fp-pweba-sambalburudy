@@ -76,7 +76,7 @@ $cart_count = isset($_SESSION['cart']) ? count($_SESSION['cart']) : 0;
             </div>
             <div class="w-full lg:w-1/2 relative z-10">
                 <div class="relative rounded-3xl overflow-hidden shadow-2xl bg-white p-2">
-                    <img src="../../assets/images/hero-bg.jpg" alt="Hero" class="w-full h-auto object-cover rounded-2xl" onerror="this.src='https://via.placeholder.com/600x400?text=Bu+Rudy+Surabaya'">
+                    <img src="../../images/logo-bu-rudy.png" alt="Hero" class="w-full h-auto object-cover rounded-2xl" onerror="this.src='https://via.placeholder.com/600x400?text=Bu+Rudy+Surabaya'">
                 </div>
             </div>
         </div>
