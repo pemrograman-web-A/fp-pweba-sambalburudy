@@ -99,7 +99,7 @@ $cart_count = isset($_SESSION['cart']) ? count($_SESSION['cart']) : 0;
                 ?>
                 <div class="bg-gray-50 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition border border-gray-100 flex flex-col">
                     <div class="h-64 overflow-hidden relative">
-                        <img src="../../assets/images/<?= $product['image'] ?>" alt="<?= $product['name'] ?>" class="w-full h-full object-cover">
+                        <img src="../../images/<?= $product['image'] ?>" alt="<?= $product['name'] ?>" class="w-full h-full object-cover">
                     </div>
                     <div class="p-6 flex-1 flex flex-col">
                         <h3 class="text-xl font-bold mb-2 font-serif"><?= $product['name'] ?></h3>

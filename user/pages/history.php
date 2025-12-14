@@ -74,7 +74,7 @@ $query = $conn->query("SELECT * FROM orders WHERE user_id = '$uid' ORDER BY crea
                                 ?>
                                     <div class="flex items-center gap-4">
                                         <div class="w-12 h-12 bg-gray-100 rounded-md overflow-hidden flex-shrink-0">
-                                            <img src="../../assets/images/<?= $item['image'] ?>" class="w-full h-full object-cover">
+                                            <img src="../../images/<?= $item['image'] ?>" class="w-full h-full object-cover">
                                         </div>
                                         <div class="flex-1">
                                             <h4 class="font-bold text-sm text-gray-800"><?= $item['name'] ?></h4>

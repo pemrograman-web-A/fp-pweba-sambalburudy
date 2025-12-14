@@ -53,7 +53,7 @@ $total = 0;
                         ?>
                         <div class="p-6 border-b border-gray-100 flex items-center gap-4">
                             <div class="w-20 h-20 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
-                                <img src="../../assets/images/<?= $item['image'] ?>" class="w-full h-full object-cover">
+                                <img src="../../images/<?= $item['image'] ?>" class="w-full h-full object-cover">
                             </div>
                             <div class="flex-1">
                                 <h3 class="font-bold text-lg"><?= $item['name'] ?></h3>
