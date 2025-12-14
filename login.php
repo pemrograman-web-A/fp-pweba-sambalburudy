@@ -4,7 +4,7 @@ require 'config/database.php';
 
 if (isset($_SESSION['role'])) {
     // Redirect jika user iseng buka halaman login padahal sudah login
-    if ($_SESSION['role'] == 'admin') header("Location: admin/pages/dashboard.php");
+    if ($_SESSION['role'] == 'admin') header("Location: admin/pages/admin.php");
     else header("Location: user/pages/home.php");
     exit;
 }
@@ -18,7 +18,7 @@ if (isset($_POST['login'])) {
         $_SESSION['user_id'] = 0;
         $_SESSION['name'] = 'Admin Bu Rudy';
         $_SESSION['role'] = 'admin';
-        header("Location: admin/pages/dashboard.php"); // Path Admin Baru
+        header("Location: admin/pages/admin.php"); // Path Admin Baru
         exit;
     }
 
@@ -37,7 +37,7 @@ if (isset($_POST['login'])) {
 
             // Redirect ke Folder User Baru
             if ($row['role'] == 'admin') {
-                header("Location: admin/pages/dashboard.php");
+                header("Location: admin/pages/admin.php");
             } else {
                 header("Location: user/pages/home.php"); 
             }
