@@ -96,6 +96,7 @@
             <h3 id="modalTitle" class="text-2xl font-serif font-bold mb-4 text-burudy-dark">Tambah Produk</h3>
             <form id="productForm">
                 <input type="hidden" id="productId">
+                
                 <div class="mb-4">
                     <label for="name" class="block text-sm font-medium text-gray-700">Nama Produk</label>
                     <input type="text" id="name" name="name" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
@@ -135,13 +136,13 @@
     </div>
 
     <script>
-        // PERBAIKAN PATH API: Mengarah ke /admin/api/product/
         const API_URL = '../api/product_api.php'; 
         const tabelProdukBody = document.getElementById('tabelProdukBody');
         const productModal = document.getElementById('productModal');
         const productForm = document.getElementById('productForm');
         const modalTitle = document.getElementById('modalTitle');
         const submitButton = document.getElementById('submitButton');
+        const btnTambahProduk = document.getElementById('btnTambahProduk'); 
 
         // Modal Hapus Kustom
         const deleteModal = document.getElementById('deleteModal');
@@ -153,6 +154,34 @@
         const formatRupiah = (angka) => {
             return 'Rp ' + (new Intl.NumberFormat('id-ID', { minimumFractionDigits: 0 }).format(angka));
         };
+
+        // --- FUNGSI GLOBAL ---
+        
+        // 1. Fungsi Buka Modal Edit
+        window.openEditModal = (id, name, description, price, stock) => {
+            modalTitle.textContent = 'Edit Produk: ' + id;
+            submitButton.textContent = 'Simpan Perubahan';
+            
+            document.getElementById('productId').value = id; 
+            document.getElementById('name').value = name;
+            // Jika deskripsi null/undefined, set jadi string kosong agar tidak muncul "null"
+            document.getElementById('description').value = description || ''; 
+            document.getElementById('price').value = price;
+            document.getElementById('stock').value = stock;
+            
+            productModal.classList.remove('hidden');
+            productModal.classList.add('flex');
+        };
+
+        // 2. Fungsi Konfirmasi Hapus
+        window.showDeleteConfirmation = (id, name) => {
+            productIdToDelete = id;
+            deleteMessage.innerHTML = `Apakah Anda yakin ingin menghapus produk <strong>${name} (${id})</strong>? Aksi ini tidak dapat dibatalkan.`;
+            deleteModal.classList.remove('hidden');
+            deleteModal.classList.add('flex');
+        };
+        
+        // --- LOAD DATA ---
 
         const loadProducts = async () => {
             tabelProdukBody.innerHTML = '<tr><td colspan="6" class="px-6 py-4 text-center text-gray-500">Memuat data produk...</td></tr>';
@@ -169,9 +198,10 @@
                 }
 
                 products.forEach(product => {
-                    const displayDescription = (product.description && product.description !== '0') ? product.description : '-';
+                    // PERBAIKAN: Jangan tampilkan '-' jika kosong, biarkan kosong agar bersih
+                    // Jika Anda ingin menampilkan teks 'Tidak ada deskripsi', ganti '' dengan teks tersebut
+                    const displayDescription = product.description || ''; 
                     
-                    // RAW DATA: Escaping quotes untuk mencegah error JS pada onclick
                     const rawName = (product.name || '').replace(/'/g, "\\'"); 
                     const rawDescription = (product.description || '').replace(/'/g, "\\'");
                     
@@ -202,17 +232,7 @@
             }
         };
 
-        const openEditModal = (id, name, description, price, stock) => {
-            modalTitle.textContent = 'Edit Produk: ' + id;
-            submitButton.textContent = 'Simpan Perubahan';
-            document.getElementById('productId').value = id; 
-            document.getElementById('name').value = name;
-            document.getElementById('description').value = description; 
-            document.getElementById('price').value = price;
-            document.getElementById('stock').value = stock;
-            productModal.classList.remove('hidden');
-            productModal.classList.add('flex');
-        };
+        // --- HANDLERS ---
 
         document.getElementById('closeModal').onclick = () => {
             productModal.classList.remove('flex');
@@ -220,15 +240,31 @@
             productForm.reset();
         };
 
-        // 3. CREATE/UPDATE: Submit Form
+        // Tombol Tambah Produk (Mode POST)
+        btnTambahProduk.onclick = () => {
+            productForm.reset(); 
+            
+            // PERBAIKAN: Paksa kosongkan field deskripsi agar tidak ada sisa karakter
+            document.getElementById('description').value = '';
+            document.getElementById('productId').value = ''; 
+            
+            modalTitle.textContent = 'Tambah Produk Baru';
+            submitButton.textContent = 'Simpan';
+            productModal.classList.remove('hidden');
+            productModal.classList.add('flex');
+        };
+
+        // Submit Form (Menangani CREATE dan UPDATE)
         productForm.onsubmit = async (e) => {
             e.preventDefault();
+            
             const id = document.getElementById('productId').value;
-            const isUpdate = id !== '';
+            const isUpdate = id !== ''; 
             
             const method = isUpdate ? 'PUT' : 'POST';
             let url = API_URL;
-            if (isUpdate) url += `?id=${id}`;
+            
+            if (isUpdate) url += `?id=${id}`; 
 
             const productData = {
                 name: document.getElementById('name').value,
@@ -260,25 +296,9 @@
             }
         };
 
-        // --- FUNGSI HAPUS CUSTOM MODAL ---
-
-        // 4a. Menampilkan modal konfirmasi
-        const showDeleteConfirmation = (id, name) => {
-            productIdToDelete = id;
-            
-            // Mengatur pesan konfirmasi kustom
-            deleteMessage.innerHTML = `Apakah Anda yakin ingin menghapus produk <strong>${name} (${id})</strong>? Aksi ini tidak dapat dibatalkan.`;
-            
-            // Menampilkan modal
-            deleteModal.classList.remove('hidden');
-            deleteModal.classList.add('flex');
-        };
-
-        // 4b. Fungsi yang dieksekusi setelah konfirmasi
+        // Fungsi DELETE
         const executeDelete = async () => {
             const id = productIdToDelete;
-            
-            // Menyembunyikan modal
             deleteModal.classList.remove('flex');
             deleteModal.classList.add('hidden');
 
@@ -308,21 +328,15 @@
                 console.error('Error saat fetch DELETE:', error);
                 alert('Terjadi kesalahan koneksi saat menghapus.');
             } finally {
-                productIdToDelete = null; // Reset ID
+                productIdToDelete = null;
             }
         };
 
-        // Event Listeners untuk tombol Hapus di modal kustom
         btnConfirmDelete.onclick = executeDelete;
         btnCancelDelete.onclick = () => {
             deleteModal.classList.remove('flex');
             deleteModal.classList.add('hidden');
             productIdToDelete = null;
-        };
-        
-        // Fungsi utama yang dipanggil dari tombol tabel (memanggil modal)
-        const deleteProduct = (id, name) => {
-            showDeleteConfirmation(id, name);
         };
 
         document.addEventListener('DOMContentLoaded', loadProducts);

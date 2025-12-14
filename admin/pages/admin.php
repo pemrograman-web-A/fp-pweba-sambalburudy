@@ -83,7 +83,7 @@
                 })
                 .catch(error => {
                     console.error('Error:', error);
-                    alert('Gagal memuat data dashboard. Cek koneksi API.');
+                    // alert('Gagal memuat data dashboard. Cek koneksi API.'); // Optional: uncomment jika ingin alert
                     
                     // Menonaktifkan/mereset tampilan card jika API gagal
                     document.getElementById('activity-list').innerHTML = '<li class="py-3 text-center text-burudy-red">Error: Gagal memuat data aktivitas.</li>';
@@ -164,7 +164,7 @@
             
             <h2 class="text-2xl font-serif font-bold text-burudy-dark mb-6">Aksi Cepat</h2>
 
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+            <div class="grid grid-cols-2 md:grid-cols-3 gap-6">
                 <a href="order.php" class="block bg-white p-6 rounded-xl shadow-md hover:shadow-xl transition text-center border border-gray-200">
                     <i class="fas fa-hourglass-start text-4xl text-burudy-red mb-3"></i>
                     <p class="font-semibold">Pesanan Menunggu</p>
@@ -172,10 +172,6 @@
                 <a href="manajemen.php" class="block bg-white p-6 rounded-xl shadow-md hover:shadow-xl transition text-center border border-gray-200">
                     <i class="fas fa-box-open text-4xl text-burudy-gold mb-3"></i>
                     <p class="font-semibold">Manajemen Produk</p>
-                </a>
-                <a href="content.php" class="block bg-white p-6 rounded-xl shadow-md hover:shadow-xl transition text-center border border-gray-200">
-                    <i class="fas fa-edit text-4xl text-burudy-dark mb-3"></i>
-                    <p class="font-semibold">Edit Konten Halaman</p>
                 </a>
                 <a href="report.php" class="block bg-white p-6 rounded-xl shadow-md hover:shadow-xl transition text-center border border-gray-200">
                     <i class="fas fa-chart-line text-4xl text-burudy-green mb-3"></i>

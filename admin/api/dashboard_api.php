@@ -1,89 +1,103 @@
 <?php
 // /admin/api/dashboard_api.php
 
-// Path: naik satu tingkat (..) lalu masuk ke folder config/
-require_once '../config/config.php'; 
+// 1. Tampilkan Error (Untuk Debugging)
+ini_set('display_errors', 0);
+error_reporting(E_ALL);
+
+require_once '../config/config.php';
 
 header("Access-Control-Allow-Origin: *");
 header("Content-Type: application/json; charset=UTF-8");
+header("Access-Control-Allow-Methods: GET");
 
-$response = [];
+if (!isset($conn) || $conn->connect_error) {
+    http_response_code(500);
+    echo json_encode(["message" => "Database Connection Failed"]);
+    exit();
+}
+
+// 2. ATUR TIMEZONE (PENTING AGAR 'HARI INI' AKURAT)
+date_default_timezone_set('Asia/Jakarta');
+$conn->query("SET time_zone = '+07:00'");
 
 try {
-    // --- Data STATISTIK ---
+    // --- A. PENDAPATAN HARI INI ---
+    // MENGAMBIL DARI TABEL 'TRANSACTIONS' (BUKAN ORDERS)
+    $sqlRevenue = "SELECT COALESCE(SUM(total_amount), 0) AS pendapatan_hari_ini 
+                   FROM transactions 
+                   WHERE status = 'COMPLETED' 
+                   AND DATE(transaction_date) = CURDATE()";
     
-    // A. Pesanan Baru (24 Jam Terakhir, status 'Menunggu Pembayaran')
-    $stmt_orders = $conn->prepare("SELECT COUNT(order_id) FROM orders WHERE order_date >= DATE_SUB(NOW(), INTERVAL 24 HOUR) AND status = 'Menunggu Pembayaran'");
-    $stmt_orders->execute();
-    $stmt_orders->bind_result($new_orders);
-    $stmt_orders->fetch();
-    $stmt_orders->close();
-    $response['pesanan_baru'] = $new_orders ?: 0;
+    $resultRevenue = $conn->query($sqlRevenue);
+    $rowRevenue = $resultRevenue->fetch_assoc();
+    $pendapatanHariIni = (float)$rowRevenue['pendapatan_hari_ini'];
+
+    // --- B. PESANAN BARU (24 JAM TERAKHIR) ---
+    // Mengambil dari tabel 'orders' (yang statusnya pending)
+    $sqlOrders = "SELECT COUNT(*) AS pesanan_baru 
+                  FROM orders 
+                  WHERE order_date >= (NOW() - INTERVAL 24 HOUR)
+                  AND status NOT IN ('Selesai', 'Dibatalkan')";
     
-    // B. Pendapatan Hari Ini
-    $stmt_revenue = $conn->prepare("SELECT SUM(total_amount) FROM orders WHERE DATE(order_date) = CURDATE() AND status IN ('Dikirim', 'Selesai')");
-    $stmt_revenue->execute();
-    $stmt_revenue->bind_result($daily_revenue);
-    $stmt_revenue->fetch();
-    $stmt_revenue->close();
-    $response['pendapatan_hari_ini'] = (float)$daily_revenue ?: 0;
-    
-    // C. Produk Stok Rendah (misalnya, stok < 20)
-    // /admin/api/dashboard_api.php (Blok C. Produk Stok Rendah/Stok Terendah)
+    $resultOrders = $conn->query($sqlOrders);
+    $rowOrders = $resultOrders->fetch_assoc();
+    $pesananBaru = (int)$rowOrders['pesanan_baru'];
 
-    // C. Produk Stok Terendah
+    // --- C. PRODUK STOK RENDAH ---
+    $sqlStock = "SELECT COUNT(*) AS stok_rendah FROM products WHERE stock < 20";
+    $resultStock = $conn->query($sqlStock);
+    $rowStock = $resultStock->fetch_assoc();
+    $stokRendah = (int)$rowStock['stok_rendah'];
 
-    $stmt_min_stock = $conn->prepare("SELECT MIN(stock) AS stok_terendah FROM products");
-    $min_stock = 0; // Nilai default
+    // --- D. REVIEW BARU / RATING ---
+    // Menghitung rata-rata rating
+    $sqlReview = "SELECT COALESCE(AVG(rating), 0) AS avg_rating FROM reviews";
+    $resultReview = $conn->query($sqlReview);
+    $rowReview = $resultReview->fetch_assoc();
+    $avgRating = number_format((float)$rowReview['avg_rating'], 1); // 1 desimal (contoh: 4.5)
 
-    if ($stmt_min_stock && $stmt_min_stock->execute()) {
-        $stmt_min_stock->bind_result($stok_terendah);
-        if ($stmt_min_stock->fetch()) {
-            $min_stock = (int)$stok_terendah; // Ambil nilai stok terendah
-        }
-        $stmt_min_stock->close();
+    // --- E. AKTIVITAS TERBARU ---
+    $sqlActivity = "
+        (SELECT 
+            'order' as type, 
+            CONCAT('Pesanan baru dari ', customer_name) as `desc`,
+            CONCAT(FORMAT(total_amount, 0), ' IDR') as detail,
+            order_date as waktu,
+            'text-blue-600' as status_class
+         FROM orders ORDER BY order_date DESC LIMIT 5)
+        UNION ALL
+        (SELECT 
+            'review' as type,
+            CONCAT('Ulasan bintang ', rating, ' untuk ', product_id) as `desc`,
+            LEFT(comment, 30) as detail,
+            review_date as waktu,
+            'text-yellow-600' as status_class
+         FROM reviews ORDER BY review_date DESC LIMIT 5)
+        ORDER BY waktu DESC LIMIT 5
+    ";
+
+    $resultActivity = $conn->query($sqlActivity);
+    $aktivitas = [];
+    while ($row = $resultActivity->fetch_assoc()) {
+        $time = strtotime($row['waktu']);
+        $row['waktu'] = date('H:i', $time); 
+        $aktivitas[] = $row;
     }
-    // Variabel yang dikirim ke frontend harus diganti ID-nya di admin.php
 
-    // Catatan: Karena di frontend ID-nya adalah 'produk_stok_rendah',
-    // kita kirim nilai MIN() ke ID tersebut.
-    $response['produk_stok_rendah'] = $min_stock;
-
-    // /admin/api/dashboard_api.php (Blok D. Review Baru)
-
-   // D. Review Baru (Ganti dengan Rata-rata Rating)
-    // Baris simulasi $response['review_baru'] = 12; telah dihapus
-
-    // Query untuk menghitung rata-rata (Average) rating
-    $stmt_avg_rating = $conn->prepare("SELECT AVG(rating), COUNT(review_id) FROM reviews");
-    $avg_rating = 0.0;
-    $total_reviews = 0;
-
-    if ($stmt_avg_rating && $stmt_avg_rating->execute()) {
-        $stmt_avg_rating->bind_result($avg_rating_result, $total_reviews_result);
-        if ($stmt_avg_rating->fetch()) {
-            $avg_rating = (float)$avg_rating_result ?: 0.0;
-            $total_reviews = (int)$total_reviews_result ?: 0;
-        }
-        $stmt_avg_rating->close();
-    }
-
-    // Mengirim nilai rata-rata (dibulatkan 2 desimal)
-    $response['avg_rating'] = number_format($avg_rating, 2); 
-    $response['total_reviews'] = $total_reviews; 
-
-    // INI PERUBAHAN UTAMA:
-    // 'review_baru' (ID lama di frontend) sekarang akan menampilkan RATA-RATA RATING
-    $response['review_baru'] = $response['avg_rating'];
+    // KIRIM RESPONSE JSON
+    echo json_encode([
+        'pendapatan_hari_ini' => $pendapatanHariIni,
+        'pesanan_baru' => $pesananBaru,
+        'produk_stok_rendah' => $stokRendah,
+        'review_baru' => $avgRating, // Mengirim Rating Rata-rata
+        'aktivitas_terbaru' => $aktivitas
+    ]);
 
 } catch (Exception $e) {
     http_response_code(500);
-    $response = ['error' => 'Gagal mengambil data: ' . $e->getMessage()];
+    echo json_encode(['message' => 'Server Error: ' . $e->getMessage()]);
 }
 
-if (isset($conn)) {
-    $conn->close();
-}
-
-echo json_encode($response);
+$conn->close();
 ?>

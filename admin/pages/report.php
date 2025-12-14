@@ -1,6 +1,5 @@
 <?php
 // /admin/pages/report.php
-// Frontend untuk menampilkan laporan transaksi
 ?>
 <!DOCTYPE html>
 <html lang="id" class="scroll-smooth">
@@ -60,7 +59,7 @@
             <div class="flex justify-between items-center mb-6 bg-white p-4 rounded-xl shadow">
                 <div>
                     <span class="text-lg font-medium text-burudy-dark mr-3">Periode:</span>
-                    <select id="periodFilter" class="p-2 border border-gray-300 rounded-lg">
+                    <select id="periodFilter" class="p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-burudy-gold">
                         <option value="7_days">7 Hari Terakhir</option>
                         <option value="this_month">Bulan Ini</option>
                         <option value="last_month">Bulan Lalu</option>
@@ -117,7 +116,7 @@
                             <tr>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID Transaksi</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tanggal</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Jumlah Item</th>
+                                <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Jumlah Item</th>
                                 <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Jumlah (Rp)</th>
                             </tr>
                         </thead>
@@ -138,6 +137,9 @@
     </footer>
 
     <script>
+        // --- PERBAIKAN PENTING DI SINI ---
+        // Pastikan path ini sesuai dengan lokasi file PHP Anda. 
+        // Jika file PHP ada di /admin/api/report_api.php, gunakan path di bawah ini:
         const API_URL = '../api/report_api.php'; 
         
         const totalRevenueEl = document.getElementById('totalRevenue');
@@ -154,15 +156,26 @@
 
         const loadReportData = async (period) => {
             loadingEl.classList.remove('hidden');
-            transactionTableBody.innerHTML = '<tr><td colspan="4" class="px-6 py-4 text-center text-gray-500">Memuat...</td></tr>';
-
+            // Bersihkan error state
+            totalRevenueEl.classList.remove('text-red-500'); 
+            
             try {
                 const response = await fetch(`${API_URL}?period=${period}`);
                 
+                // Cek jika response bukan OK (misal 404 atau 500)
                 if (!response.ok) {
-                    throw new Error(`Gagal memuat data laporan: Status ${response.status}`);
+                    const errorText = await response.text(); // Baca pesan error dari server jika ada
+                    throw new Error(`Server Error (${response.status}): ${errorText}`);
                 }
                 
+                // Cek jika response bukan JSON valid
+                const contentType = response.headers.get("content-type");
+                if (!contentType || !contentType.includes("application/json")) {
+                    const text = await response.text();
+                    console.error("Respons bukan JSON:", text);
+                    throw new Error("Respons server bukan JSON valid. Cek path API atau error PHP.");
+                }
+
                 const data = await response.json();
                 
                 // 1. Update Metrik Ringkasan
@@ -172,14 +185,14 @@
                 periodDisplayEl.textContent = `(${data.period_info.period} | ${data.period_info.start} s/d ${data.period_info.end})`;
 
                 // 2. Isi Tabel Transaksi
-                transactionTableBody.innerHTML = '';
+                let rowsHtml = '';
                 if (data.transactions.length === 0) {
-                    transactionTableBody.innerHTML = '<tr><td colspan="4" class="px-6 py-4 text-center text-gray-500">Tidak ada transaksi dalam periode ini.</td></tr>';
+                    rowsHtml = '<tr><td colspan="4" class="px-6 py-4 text-center text-gray-500">Tidak ada transaksi dalam periode ini.</td></tr>';
                 } else {
                     data.transactions.forEach(tx => {
-                        const dateOnly = tx.date.split(' ')[0]; // Ambil hanya tanggal jika formatnya DATETIME
+                        const dateOnly = tx.date ? tx.date.split(' ')[0] : '-'; 
                         
-                        const row = `
+                        rowsHtml += `
                             <tr class="hover:bg-gray-50">
                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${tx.id}</td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">${dateOnly}</td>
@@ -187,17 +200,27 @@
                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-right text-burudy-green">${formatRupiah(tx.amount)}</td>
                             </tr>
                         `;
-                        transactionTableBody.innerHTML += row;
                     });
                 }
+                transactionTableBody.innerHTML = rowsHtml;
                 
             } catch (error) {
                 console.error("Error fetching report:", error);
+                
+                // Tampilkan pesan error di UI
                 totalRevenueEl.textContent = 'Error';
                 totalTransactionsEl.textContent = 'Error';
                 totalItemsEl.textContent = 'Error';
                 periodDisplayEl.textContent = 'Gagal memuat data';
-                transactionTableBody.innerHTML = '<tr><td colspan="4" class="px-6 py-4 text-center text-burudy-red">Kesalahan API. Cek Console Log.</td></tr>';
+                
+                // Tampilkan detail error di tabel
+                transactionTableBody.innerHTML = `
+                    <tr>
+                        <td colspan="4" class="px-6 py-4 text-center text-burudy-red font-medium">
+                            Terjadi Kesalahan: ${error.message}. <br>
+                            <span class="text-sm text-gray-500">Cek Console (F12) untuk detail. Pastikan file API ada di: <b>${API_URL}</b></span>
+                        </td>
+                    </tr>`;
             } finally {
                 loadingEl.classList.add('hidden');
             }
@@ -210,7 +233,6 @@
 
         // Muat data default saat halaman dimuat
         document.addEventListener('DOMContentLoaded', () => {
-            // Muat default periode (7_days)
             loadReportData(periodFilter.value);
         });
     </script>
