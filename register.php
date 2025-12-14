@@ -1,4 +1,33 @@
 <?php
+<<<<<<< HEAD
+// /register.php
+require 'config/database.php';
+
+if (isset($_POST['register'])) {
+    $name = trim($_POST['name']);
+    $email = trim($_POST['email']);
+    $password = $_POST['password'];
+
+    // 1. Validasi Email Unik
+    $stmt = $conn->prepare("SELECT id FROM users WHERE email = ?");
+    $stmt->bind_param("s", $email);
+    $stmt->execute();
+    
+    if ($stmt->get_result()->num_rows > 0) {
+        $error = "Email sudah terdaftar, silakan login.";
+    } else {
+        // 2. Hash Password & Simpan
+        $hashed_password = password_hash($password, PASSWORD_DEFAULT);
+        
+        $insert = $conn->prepare("INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, 'user')");
+        $insert->bind_param("sss", $name, $email, $hashed_password);
+        
+        if ($insert->execute()) {
+            echo "<script>alert('Pendaftaran Berhasil! Silakan Login.'); window.location='login.php';</script>";
+            exit;
+        } else {
+            $error = "Gagal mendaftar: " . $conn->error;
+=======
 require 'koneksi.php';
 
 if (isset($_POST['register'])) {
@@ -19,6 +48,7 @@ if (isset($_POST['register'])) {
             echo "<script>alert('Pendaftaran Berhasil! Silakan Login.'); window.location='login.php';</script>";
         } else {
             $error = "Gagal mendaftar: " . mysqli_error($conn);
+>>>>>>> origin/main
         }
     }
 }
@@ -29,7 +59,11 @@ if (isset($_POST['register'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<<<<<<< HEAD
+    <title>Daftar Akun - Sambal Bu Rudy</title>
+=======
     <title>Daftar - Sambal Bu Rudy</title>
+>>>>>>> origin/main
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = { theme: { extend: { colors: { burudy: { red: "#B91C1C", gold: "#F59E0B", dark: "#1F2937" } } } } };

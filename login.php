@@ -1,36 +1,45 @@
 <?php
 session_start();
-require 'koneksi.php';
+require 'config/database.php'; 
+
+if (isset($_SESSION['role'])) {
+    // Redirect jika user iseng buka halaman login padahal sudah login
+    if ($_SESSION['role'] == 'admin') header("Location: admin/pages/dashboard.php");
+    else header("Location: user/pages/home.php");
+    exit;
+}
 
 if (isset($_POST['login'])) {
     $email = $_POST['email'];
     $password = $_POST['password'];
 
-    // 1. Cek Hardcoded Admin (Sesuai Request)
+    // 1. Cek Hardcoded Admin
     if ($email === 'admin' && $password === 'admin123') {
         $_SESSION['user_id'] = 0;
         $_SESSION['name'] = 'Admin Bu Rudy';
         $_SESSION['role'] = 'admin';
-        header("Location: admin/admin.html");
+        header("Location: admin/pages/dashboard.php"); // Path Admin Baru
         exit;
     }
 
-    // 2. Cek User Biasa dari Database
-    $query = "SELECT * FROM users WHERE email = '$email'";
-    $result = mysqli_query($conn, $query);
+    // 2. Cek User Biasa (Prepared Statement - AMAN)
+    $stmt = $conn->prepare("SELECT id, name, password, role FROM users WHERE email = ?");
+    $stmt->bind_param("s", $email);
+    $stmt->execute();
+    $result = $stmt->get_result();
 
-    if (mysqli_num_rows($result) === 1) {
-        $row = mysqli_fetch_assoc($result);
-        // Verifikasi password (gunakan password_verify jika register di-hash)
+    if ($result->num_rows === 1) {
+        $row = $result->fetch_assoc();
         if (password_verify($password, $row['password'])) {
             $_SESSION['user_id'] = $row['id'];
             $_SESSION['name'] = $row['name'];
             $_SESSION['role'] = $row['role'];
 
+            // Redirect ke Folder User Baru
             if ($row['role'] == 'admin') {
-                header("Location: admin/admin.html");
+                header("Location: admin/pages/dashboard.php");
             } else {
-                header("Location: index.html");
+                header("Location: user/pages/home.php"); 
             }
             exit;
         }
@@ -81,7 +90,7 @@ if (isset($_POST['login'])) {
             Belum punya akun? <a href="register.php" class="text-burudy-red font-bold hover:underline">Daftar disini</a>
         </p>
         <p class="mt-2 text-center text-xs text-gray-400">
-            <a href="index.html" class="hover:text-gray-600">&larr; Kembali ke Beranda</a>
+            <a href="index.php" class="hover:text-gray-600">&larr; Kembali ke Beranda</a>
         </p>
     </div>
 </body>
