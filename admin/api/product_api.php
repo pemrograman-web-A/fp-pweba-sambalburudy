@@ -3,7 +3,7 @@
 
 // Muat konfigurasi database (Menggunakan MySQLi)
 // Path disesuaikan: naik dua tingkat (dari /api/product/ ke /admin/) lalu masuk ke /config/
-require_once '../config/config.php'; 
+require_once '../config/config.php'; // ASUMSI: config.php menggunakan koneksi $conn = new mysqli(...)
 
 // Konfigurasi Header
 header("Access-Control-Allow-Origin: *");
@@ -18,7 +18,8 @@ $method = $_SERVER['REQUEST_METHOD'];
 $data = json_decode(file_get_contents("php://input"), true);
 
 // Pastikan koneksi sukses (diambil dari config.php)
-if (!isset($conn) || $conn->connect_error) { 
+// Cek koneksi sudah dilakukan di config.php, jadi cek ini hanya sebagai fallback
+if (!$conn) { 
     http_response_code(500);
     echo json_encode(["message" => "Internal Server Error: Database Connection Failed (Fatal)."]);
     exit();
@@ -59,7 +60,6 @@ switch ($method) {
                 $products[] = $row;
             }
         }
-        http_response_code(200);
         echo json_encode($products);
         break;
 
@@ -82,9 +82,7 @@ switch ($method) {
         
         if ($stmt = $conn->prepare($sql)) {
             // s: string, i: integer, d: double/float
-            // Urutan parameter: product_id (s), name (s), description (s), price (d), stock (i)
-            $stmt->bind_param("sssid", $newId, $name, $description, $price, $stock);
-            
+            $stmt->bind_param("ssdii", $newId, $name, $description, $price, $stock);
             if ($stmt->execute()) {
                 http_response_code(201); // Created
                 echo json_encode(['message' => 'Produk berhasil ditambahkan.', 'id' => $newId]);
@@ -106,7 +104,7 @@ switch ($method) {
         // Validasi minimal
         if (empty($productId) || empty($data['name']) || empty($data['price']) || !isset($data['stock'])) {
             http_response_code(400);
-            echo json_encode(['message' => 'ID atau data produk (Nama, Harga, Stok) tidak lengkap.']);
+            echo json_encode(['message' => 'ID atau data produk tidak lengkap.']);
             break;
         }
 
@@ -118,35 +116,14 @@ switch ($method) {
         $sql = "UPDATE products SET name = ?, description = ?, price = ?, stock = ? WHERE product_id = ?";
         
         if ($stmt = $conn->prepare($sql)) {
-            // Perbaikan binding parameter:
-            // Format: name (s), description (s), price (d), stock (i), product_id (s)
-            // Tipe data: string, string, double/float, integer, string
-            $stmt->bind_param("ssdis", $name, $description, $price, $stock, $productId);
-            
+            // s: string, d: double/float, i: integer
+            $stmt->bind_param("sdisi", $name, $description, $price, $stock, $productId);
             if ($stmt->execute()) {
-                // Gunakan affected_rows untuk memastikan ada baris yang benar-benar diubah
                 if ($stmt->affected_rows > 0) {
-                    http_response_code(200);
                     echo json_encode(['message' => 'Produk berhasil diperbarui.', 'id' => $productId]);
                 } else {
-                    // Jika affected_rows == 0, ID mungkin tidak ada atau data yang dikirim sama
-                    // Kita asumsikan 200 OK jika query berhasil tapi 0 affected, 
-                    // kecuali kita ingin membedakan antara "Tidak Ditemukan" (404)
-                    // Saya menggunakan 404 untuk kasus 'tidak ditemukan'
-                    $checkSql = "SELECT product_id FROM products WHERE product_id = ?";
-                    $checkStmt = $conn->prepare($checkSql);
-                    $checkStmt->bind_param("s", $productId);
-                    $checkStmt->execute();
-                    
-                    if ($checkStmt->get_result()->num_rows === 0) {
-                         http_response_code(404);
-                         echo json_encode(['message' => 'Produk tidak ditemukan.']);
-                    } else {
-                        // Produk ditemukan, tapi tidak ada perubahan data
-                        http_response_code(200);
-                        echo json_encode(['message' => 'Produk berhasil diperbarui (Tidak ada perubahan data).', 'id' => $productId]);
-                    }
-                    $checkStmt->close();
+                     http_response_code(404);
+                     echo json_encode(['message' => 'Produk tidak ditemukan atau tidak ada perubahan data.']);
                 }
             } else {
                 http_response_code(500);
@@ -175,7 +152,6 @@ switch ($method) {
             $stmt->bind_param("s", $productId);
             if ($stmt->execute()) {
                 if ($stmt->affected_rows > 0) {
-                    http_response_code(200);
                     echo json_encode(['message' => 'Produk berhasil dihapus.']);
                 } else {
                     http_response_code(404);
@@ -199,7 +175,5 @@ switch ($method) {
 }
 
 // Tutup koneksi database
-if (isset($conn)) {
-    $conn->close();
-}
+$conn->close();
 ?>

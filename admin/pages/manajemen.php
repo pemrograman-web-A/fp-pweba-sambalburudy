@@ -221,6 +221,21 @@
         };
 
         // 3. CREATE/UPDATE: Submit Form
+        const btnTambahProduk = document.getElementById('btnTambahProduk'); 
+
+        // PERBAIKAN: Event Listener untuk tombol Tambah Produk Baru
+        btnTambahProduk.onclick = () => {
+            productForm.reset(); // Reset form
+            document.getElementById('productId').value = ''; // Penting: Kosongkan ID untuk mode CREATE
+
+            // Atur modal ke mode CREATE
+            modalTitle.textContent = 'Tambah Produk Baru';
+            submitButton.textContent = 'Simpan';
+            
+            productModal.classList.remove('hidden');
+            productModal.classList.add('flex');
+        };
+        
         productForm.onsubmit = async (e) => {
             e.preventDefault();
             const id = document.getElementById('productId').value;
