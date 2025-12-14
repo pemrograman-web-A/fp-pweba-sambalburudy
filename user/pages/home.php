@@ -76,7 +76,7 @@ $cart_count = isset($_SESSION['cart']) ? count($_SESSION['cart']) : 0;
             </div>
             <div class="w-full lg:w-1/2 relative z-10">
                 <div class="relative rounded-3xl overflow-hidden shadow-2xl bg-white p-2">
-                    <img src="../../assets/images/hero-bg.jpg" alt="Hero" class="w-full h-auto object-cover rounded-2xl">
+                    <img src="../../assets/images/hero-bg.jpg" alt="Hero" class="w-full h-auto object-cover rounded-2xl" onerror="this.src='https://via.placeholder.com/600x400?text=Bu+Rudy+Surabaya'">
                 </div>
             </div>
         </div>
@@ -91,31 +91,47 @@ $cart_count = isset($_SESSION['cart']) ? count($_SESSION['cart']) : 0;
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 <?php
                 // Ambil produk dari database
-                $query = "SELECT * FROM products ORDER BY id DESC";
+                $query = "SELECT * FROM products ORDER BY id ASC";
                 $result = $conn->query($query);
 
                 if ($result->num_rows > 0) {
                     while($product = $result->fetch_assoc()) {
+                        // Fallback jika image kosong
+                        $imgSrc = !empty($product['image']) ? $product['image'] : 'default.jpg';
                 ?>
-                <div class="bg-gray-50 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition border border-gray-100 flex flex-col">
-                    <div class="h-64 overflow-hidden relative">
-                        <img src="../../images/<?= $product['image'] ?>" alt="<?= $product['name'] ?>" class="w-full h-full object-cover">
+                <div class="bg-gray-50 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition border border-gray-100 flex flex-col h-full">
+                    <div class="h-64 overflow-hidden relative bg-white p-4">
+                        <img src="../../images/<?= $imgSrc ?>" alt="<?= $product['name'] ?>" class="w-full h-full object-contain hover:scale-110 transition duration-500">
                     </div>
                     <div class="p-6 flex-1 flex flex-col">
-                        <h3 class="text-xl font-bold mb-2 font-serif"><?= $product['name'] ?></h3>
-                        <p class="text-gray-500 text-sm mb-4 flex-1"><?= $product['description'] ?></p>
-                        <div class="flex justify-between items-center pt-4 border-t border-gray-200 mt-auto">
-                            <span class="text-lg font-bold text-burudy-red">Rp <?= number_format($product['price'], 0, ',', '.') ?></span>
-                            <button onclick="addToCart(<?= $product['id'] ?>)" class="bg-burudy-green hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition flex items-center gap-2">
-                                <i class="fas fa-cart-plus"></i> Tambah
-                            </button>
+                        <h3 class="text-xl font-bold mb-2 font-serif line-clamp-2"><?= $product['name'] ?></h3>
+                        <p class="text-gray-500 text-sm mb-4 flex-1 line-clamp-3"><?= $product['description'] ?></p>
+                        
+                        <div class="flex justify-between items-end pt-4 border-t border-gray-200 mt-auto">
+                            <div class="flex flex-col">
+                                <span class="text-xs text-gray-500">Harga</span>
+                                <span class="text-lg font-bold text-burudy-red">Rp <?= number_format($product['price'], 0, ',', '.') ?></span>
+                            </div>
+                            
+                            <div class="flex gap-2">
+                                <button onclick="addToCart(<?= $product['id'] ?>)" 
+                                        class="bg-gray-200 hover:bg-gray-300 text-gray-700 p-2 rounded-lg transition" 
+                                        title="Tambah ke Keranjang">
+                                    <i class="fas fa-cart-plus"></i>
+                                </button>
+                                
+                                <button onclick="addToCart(<?= $product['id'] ?>, true)" 
+                                        class="bg-burudy-red hover:bg-red-800 text-white px-4 py-2 rounded-lg text-sm font-semibold transition shadow-md">
+                                    Beli Sekarang
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
                 <?php 
                     } 
                 } else {
-                    echo "<p class='text-center col-span-3'>Belum ada produk yang tersedia.</p>";
+                    echo "<div class='col-span-3 text-center py-10'><p class='text-gray-500 text-lg'>Belum ada produk yang tersedia.</p></div>";
                 }
                 ?>
             </div>
@@ -123,7 +139,12 @@ $cart_count = isset($_SESSION['cart']) ? count($_SESSION['cart']) : 0;
     </section>
 
     <script>
-        function addToCart(productId) {
+        /**
+         * Fungsi Add to Cart
+         * @param {number} productId - ID Produk
+         * @param {boolean} isBuyNow - Jika true, langsung redirect ke cart.php
+         */
+        function addToCart(productId, isBuyNow = false) {
             const formData = new FormData();
             formData.append('action', 'add');
             formData.append('product_id', productId);
@@ -135,16 +156,27 @@ $cart_count = isset($_SESSION['cart']) ? count($_SESSION['cart']) : 0;
             .then(response => response.json())
             .then(data => {
                 if(data.status === 'success') {
-                    // Update Badge Cart
+                    // Update Badge Cart di Navbar
                     const badge = document.getElementById('cart-badge');
                     badge.innerText = data.cart_count;
                     badge.classList.remove('hidden');
-                    alert('✅ Produk berhasil masuk keranjang!');
+
+                    if (isBuyNow) {
+                        // Jika tombol "Beli Sekarang", langsung ke halaman keranjang
+                        window.location.href = 'cart.php';
+                    } else {
+                        // Jika tombol "Tambah", munculkan notifikasi saja
+                        // Kita bisa pakai Alert atau Toast sederhana
+                        alert('✅ ' + data.message); 
+                    }
                 } else {
                     alert('❌ Gagal: ' + data.message);
                 }
             })
-            .catch(error => console.error('Error:', error));
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Terjadi kesalahan koneksi.');
+            });
         }
     </script>
 
