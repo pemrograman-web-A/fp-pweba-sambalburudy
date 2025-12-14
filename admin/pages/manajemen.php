@@ -1,6 +1,3 @@
-<?php
-// /admin/pages/manajemen.php
-?>
 <!DOCTYPE html>
 <html lang="id" class="scroll-smooth">
 <head>

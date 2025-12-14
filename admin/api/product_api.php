@@ -1,5 +1,4 @@
 <?php
-// /admin/api/product/product_api.php
 
 require_once '../config/config.php';
 
@@ -61,10 +60,6 @@ switch ($method) {
         $sql = "INSERT INTO products (product_id, name, description, price, stock) VALUES (?, ?, ?, ?, ?)";
         
         if ($stmt = $conn->prepare($sql)) {
-            // --- PERBAIKAN DISINI ---
-            // SALAH: "ssdii" (Description dianggap Double/Angka)
-            // BENAR: "sssdi" 
-            // Urutan: ID(s), Name(s), Description(s), Price(d), Stock(i)
             $stmt->bind_param("sssdi", $newId, $name, $description, $price, $stock);
             
             if ($stmt->execute()) {
@@ -96,9 +91,6 @@ switch ($method) {
         $sql = "UPDATE products SET name = ?, description = ?, price = ?, stock = ? WHERE product_id = ?";
         
         if ($stmt = $conn->prepare($sql)) {
-            // --- PERBAIKAN DISINI ---
-            // Pastikan formatnya: "ssdis"
-            // Urutan: Name(s), Description(s), Price(d), Stock(i), ID(s)
             $stmt->bind_param("ssdis", $name, $description, $price, $stock, $productId);
             
             if ($stmt->execute()) {

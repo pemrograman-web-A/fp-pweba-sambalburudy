@@ -1,14 +1,9 @@
 <?php
-// /admin/config/config.php
-
-// Database credentials
 define('DB_SERVER', 'localhost');
 define('DB_USERNAME', 'root');   // GANTI dengan username database Anda
 define('DB_PASSWORD', '');       // GANTI dengan password database Anda
 define('DB_NAME', 'db_burudy');  // GANTI dengan nama database yang Anda buat
 
-// Membuat koneksi MySQLi
-// Menggunakan sintaks procedural untuk penanganan error yang lebih eksplisit
 $conn = mysqli_connect(DB_SERVER, DB_USERNAME, DB_PASSWORD, DB_NAME);
 
 // Mengecek koneksi

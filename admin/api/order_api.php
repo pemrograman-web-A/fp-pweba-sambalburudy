@@ -1,7 +1,5 @@
 <?php
-// /admin/api/order_api.php
 
-// Path: naik satu tingkat (..) lalu masuk ke folder config/
 require_once '../config/config.php'; 
 
 header("Access-Control-Allow-Origin: *");

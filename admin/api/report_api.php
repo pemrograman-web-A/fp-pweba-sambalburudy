@@ -1,7 +1,5 @@
 <?php
-// File: /admin/api/report_api.php
 
-// Matikan display error agar tidak merusak format JSON jika ada warning
 ini_set('display_errors', 0); 
 error_reporting(E_ALL);
 
@@ -9,8 +7,6 @@ header("Access-Control-Allow-Origin: *");
 header("Content-Type: application/json; charset=UTF-8");
 header("Access-Control-Allow-Methods: GET");
 
-// --- PERBAIKAN PATH CONFIG DI SINI ---
-// Naik 1 tingkat dari /api/ ke /admin/, lalu masuk ke /config/
 $configPath = '../config/config.php';
 
 if (!file_exists($configPath)) {

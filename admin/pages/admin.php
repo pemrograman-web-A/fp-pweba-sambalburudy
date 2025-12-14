@@ -1,6 +1,5 @@
 <?php
-// /admin/pages/admin.php
-// PASTIKAN file ini memiliki ekstensi .php
+
 ?>
 <!DOCTYPE html>
 <html lang="id" class="scroll-smooth">
@@ -43,7 +42,6 @@
 
         // --- FUNGSI UTAMA UNTUK MENGAMBIL DATA DARI API ---
         document.addEventListener('DOMContentLoaded', () => {
-            // Mengganti API_URL di sini
             const API_URL = '../api/dashboard_api.php'; 
             
             fetch(API_URL) 
@@ -83,8 +81,7 @@
                 })
                 .catch(error => {
                     console.error('Error:', error);
-                    // alert('Gagal memuat data dashboard. Cek koneksi API.'); // Optional: uncomment jika ingin alert
-                    
+
                     // Menonaktifkan/mereset tampilan card jika API gagal
                     document.getElementById('activity-list').innerHTML = '<li class="py-3 text-center text-burudy-red">Error: Gagal memuat data aktivitas.</li>';
                     document.getElementById('pesanan_baru').textContent = 'X';

@@ -1,7 +1,3 @@
-<?php
-// /admin/pages/order.php
-// Halaman untuk mengelola pesanan yang masih pending/menunggu.
-?>
 <!DOCTYPE html>
 <html lang="id" class="scroll-smooth">
 <head>
