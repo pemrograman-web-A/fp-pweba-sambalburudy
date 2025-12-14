@@ -3,7 +3,7 @@
 
 // Muat konfigurasi database
 // Path disesuaikan: naik dua tingkat (dari /api/content/ ke /admin/) lalu masuk ke /config/
-require_once '../../config/config.php';
+require_once ../config/config.php';
 
 // Konfigurasi Header
 header("Access-Control-Allow-Origin: *");

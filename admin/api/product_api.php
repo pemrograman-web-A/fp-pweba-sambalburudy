@@ -1,9 +1,9 @@
 <?php
 // /admin/api/product/product_api.php
 
-// Muat konfigurasi database
+// Muat konfigurasi database (Menggunakan MySQLi)
 // Path disesuaikan: naik dua tingkat (dari /api/product/ ke /admin/) lalu masuk ke /config/
-require_once '../../../config/config.php';
+require_once '../config/config.php'; // ASUMSI: config.php menggunakan koneksi $conn = new mysqli(...)
 
 // Konfigurasi Header
 header("Access-Control-Allow-Origin: *");
@@ -14,12 +14,14 @@ header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers
 
 // Menerima method request
 $method = $_SERVER['REQUEST_METHOD'];
+// Input JSON hanya relevan untuk POST dan PUT
 $data = json_decode(file_get_contents("php://input"), true);
 
-// Pastikan koneksi sukses
-if ($conn->connect_error) {
+// Pastikan koneksi sukses (diambil dari config.php)
+// Cek koneksi sudah dilakukan di config.php, jadi cek ini hanya sebagai fallback
+if (!$conn) { 
     http_response_code(500);
-    echo json_encode(["message" => "Internal Server Error: Database Connection Failed."]);
+    echo json_encode(["message" => "Internal Server Error: Database Connection Failed (Fatal)."]);
     exit();
 }
 
@@ -33,7 +35,9 @@ function generateNewId($conn) {
     if ($result && $result->num_rows > 0) {
         $row = $result->fetch_assoc();
         $lastId = $row['product_id']; // Contoh: BR003
-        $lastNumber = (int)substr($lastId, 2);
+        // Mengambil 3 digit terakhir dari ID
+        $lastNumber = (int)substr($lastId, 2); 
+        // Mengembalikan ID baru dengan padding '0'
         return 'BR' . str_pad($lastNumber + 1, 3, '0', STR_PAD_LEFT);
     }
     return 'BR001';
@@ -50,8 +54,8 @@ switch ($method) {
 
         if ($result && $result->num_rows > 0) {
             while ($row = $result->fetch_assoc()) {
-                // Konversi string numerik menjadi integer untuk konsistensi JS
-                $row['price'] = (int)$row['price'];
+                // Konversi string numerik menjadi integer/float untuk konsistensi JS
+                $row['price'] = (float)$row['price'];
                 $row['stock'] = (int)$row['stock'];
                 $products[] = $row;
             }
@@ -61,89 +65,106 @@ switch ($method) {
 
     case 'POST':
         // CREATE: Menambah produk baru
-        if (isset($data['name']) && isset($data['price']) && isset($data['stock'])) {
-            $newId = generateNewId($conn);
-            $name = $data['name'];
-            $price = (int)$data['price'];
-            $stock = (int)$data['stock'];
-            $description = $data['description'] ?? null;
-            
-            $sql = "INSERT INTO products (product_id, name, description, price, stock) VALUES (?, ?, ?, ?, ?)";
-            
-            if ($stmt = $conn->prepare($sql)) {
-                $stmt->bind_param("ssisi", $newId, $name, $description, $price, $stock);
-                if ($stmt->execute()) {
-                    http_response_code(201); // Created
-                    echo json_encode(['message' => 'Produk berhasil ditambahkan.', 'id' => $newId]);
-                } else {
-                    http_response_code(500);
-                    echo json_encode(['message' => 'Gagal menjalankan query: ' . $stmt->error]);
-                }
-                $stmt->close();
-            }
-        } else {
+        // Validasi minimal
+        if (empty($data['name']) || empty($data['price']) || !isset($data['stock'])) {
             http_response_code(400); // Bad Request
-            echo json_encode(['message' => 'Data produk tidak lengkap.']);
+            echo json_encode(['message' => 'Data produk (Nama, Harga, Stok) tidak lengkap.']);
+            break;
+        }
+
+        $newId = generateNewId($conn);
+        $name = trim($data['name']);
+        $price = (float)$data['price'];
+        $stock = (int)$data['stock'];
+        $description = $data['description'] ?? null;
+        
+        $sql = "INSERT INTO products (product_id, name, description, price, stock) VALUES (?, ?, ?, ?, ?)";
+        
+        if ($stmt = $conn->prepare($sql)) {
+            // s: string, i: integer, d: double/float
+            $stmt->bind_param("ssdii", $newId, $name, $description, $price, $stock);
+            if ($stmt->execute()) {
+                http_response_code(201); // Created
+                echo json_encode(['message' => 'Produk berhasil ditambahkan.', 'id' => $newId]);
+            } else {
+                http_response_code(500);
+                echo json_encode(['message' => 'Gagal menjalankan query: ' . $stmt->error]);
+            }
+            $stmt->close();
+        } else {
+            http_response_code(500);
+            echo json_encode(['message' => 'Gagal menyiapkan statement: ' . $conn->error]);
         }
         break;
 
     case 'PUT':
         // UPDATE: Mengubah data produk
         $productId = $_GET['id'] ?? null;
-        if ($productId && isset($data['name']) && isset($data['price']) && isset($data['stock'])) {
-            $name = $data['name'];
-            $price = (int)$data['price'];
-            $stock = (int)$data['stock'];
-            $description = $data['description'] ?? null;
 
-            $sql = "UPDATE products SET name = ?, description = ?, price = ?, stock = ? WHERE product_id = ?";
-            
-            if ($stmt = $conn->prepare($sql)) {
-                // s: string, i: integer
-                $stmt->bind_param("sisis", $name, $description, $price, $stock, $productId);
-                if ($stmt->execute()) {
-                    if ($stmt->affected_rows > 0) {
-                        echo json_encode(['message' => 'Produk berhasil diperbarui.', 'id' => $productId]);
-                    } else {
-                         http_response_code(404);
-                         echo json_encode(['message' => 'Produk tidak ditemukan atau tidak ada perubahan data.']);
-                    }
-                } else {
-                    http_response_code(500);
-                    echo json_encode(['message' => 'Gagal menjalankan query UPDATE: ' . $stmt->error]);
-                }
-                $stmt->close();
-            }
-        } else {
+        // Validasi minimal
+        if (empty($productId) || empty($data['name']) || empty($data['price']) || !isset($data['stock'])) {
             http_response_code(400);
             echo json_encode(['message' => 'ID atau data produk tidak lengkap.']);
+            break;
+        }
+
+        $name = trim($data['name']);
+        $price = (float)$data['price'];
+        $stock = (int)$data['stock'];
+        $description = $data['description'] ?? null;
+
+        $sql = "UPDATE products SET name = ?, description = ?, price = ?, stock = ? WHERE product_id = ?";
+        
+        if ($stmt = $conn->prepare($sql)) {
+            // s: string, d: double/float, i: integer
+            $stmt->bind_param("sdisi", $name, $description, $price, $stock, $productId);
+            if ($stmt->execute()) {
+                if ($stmt->affected_rows > 0) {
+                    echo json_encode(['message' => 'Produk berhasil diperbarui.', 'id' => $productId]);
+                } else {
+                     http_response_code(404);
+                     echo json_encode(['message' => 'Produk tidak ditemukan atau tidak ada perubahan data.']);
+                }
+            } else {
+                http_response_code(500);
+                echo json_encode(['message' => 'Gagal menjalankan query UPDATE: ' . $stmt->error]);
+            }
+            $stmt->close();
+        } else {
+            http_response_code(500);
+            echo json_encode(['message' => 'Gagal menyiapkan statement: ' . $conn->error]);
         }
         break;
 
     case 'DELETE':
         // DELETE: Menghapus produk
         $productId = $_GET['id'] ?? null;
-        if ($productId) {
-            $sql = "DELETE FROM products WHERE product_id = ?";
-            
-            if ($stmt = $conn->prepare($sql)) {
-                $stmt->bind_param("s", $productId);
-                if ($stmt->execute()) {
-                    if ($stmt->affected_rows > 0) {
-                        echo json_encode(['message' => 'Produk berhasil dihapus.']);
-                    } else {
-                        http_response_code(404);
-                        echo json_encode(['message' => 'Produk tidak ditemukan.']);
-                    }
-                } else {
-                    http_response_code(500);
-                    echo json_encode(['message' => 'Gagal menjalankan query DELETE: ' . $stmt->error]);
-                }
-                $stmt->close();
-            }
-        } else {
+        
+        if (empty($productId)) {
             http_response_code(400);
             echo json_encode(['message' => 'ID produk tidak ditentukan.']);
+            break;
+        }
+
+        $sql = "DELETE FROM products WHERE product_id = ?";
+        
+        if ($stmt = $conn->prepare($sql)) {
+            $stmt->bind_param("s", $productId);
+            if ($stmt->execute()) {
+                if ($stmt->affected_rows > 0) {
+                    echo json_encode(['message' => 'Produk berhasil dihapus.']);
+                } else {
+                    http_response_code(404);
+                    echo json_encode(['message' => 'Produk tidak ditemukan.']);
+                }
+            } else {
+                http_response_code(500);
+                echo json_encode(['message' => 'Gagal menjalankan query DELETE: ' . $stmt->error]);
+            }
+            $stmt->close();
+        } else {
+            http_response_code(500);
+            echo json_encode(['message' => 'Gagal menyiapkan statement: ' . $conn->error]);
         }
         break;
 

@@ -1,6 +1,7 @@
 <?php
 // /admin/api/report/report_api.php
 
+// KOREKSI PATH: Naik dua tingkat (../../) dari /api/report/ ke /admin/config/
 require_once '../../config/config.php';
 
 header("Access-Control-Allow-Origin: *");
@@ -19,34 +20,40 @@ if ($conn->connect_error) {
 
 function getFilterDates($period, $conn) {
     // Fungsi ini menentukan tanggal mulai dan akhir berdasarkan parameter 'period'
-    $startDate = date('Y-m-d');
-    $endDate = date('Y-m-d');
-    $periodDisplay = '';
+    try {
+        $now = new DateTime('today');
+        $startDate = '';
+        $endDate = $now->format('Y-m-d');
+        $periodDisplay = '';
 
-    switch ($period) {
-        case '7_days':
-            $startDate = date('Y-m-d', strtotime('-7 days'));
-            $periodDisplay = "7 Hari Terakhir";
-            break;
-        case 'this_month':
-            $startDate = date('Y-m-01');
-            $periodDisplay = "Bulan Ini";
-            break;
-        case 'last_month':
-            $startDate = date('Y-m-01', strtotime('last month'));
-            $endDate = date('Y-m-t', strtotime('last month'));
-            $periodDisplay = "Bulan Lalu";
-            break;
-        case 'this_year':
-            $startDate = date('Y-01-01');
-            $periodDisplay = "Tahun Ini";
-            break;
-        default: // Default 7 hari
-            $startDate = date('Y-m-d', strtotime('-7 days'));
-            $periodDisplay = "7 Hari Terakhir";
-            break;
+        switch ($period) {
+            case '7_days':
+                $startDate = (new DateTime('today - 7 days'))->format('Y-m-d');
+                $periodDisplay = "7 Hari Terakhir";
+                break;
+            case 'this_month':
+                $startDate = (new DateTime('first day of this month'))->format('Y-m-d');
+                $periodDisplay = "Bulan Ini";
+                break;
+            case 'last_month':
+                $startDate = (new DateTime('first day of last month'))->format('Y-m-d');
+                $endDate = (new DateTime('last day of last month'))->format('Y-m-d');
+                $periodDisplay = "Bulan Lalu";
+                break;
+            case 'this_year':
+                $startDate = (new DateTime('first day of January ' . date('Y')))->format('Y-m-d');
+                $periodDisplay = "Tahun Ini";
+                break;
+            default: // Default 7 hari
+                $startDate = (new DateTime('today - 7 days'))->format('Y-m-d');
+                $periodDisplay = "7 Hari Terakhir";
+                break;
+        }
+        return ['start' => $startDate, 'end' => $endDate, 'display' => $periodDisplay];
+    } catch (Exception $e) {
+        // Fallback jika DateTime error
+        return ['start' => date('Y-m-d', strtotime('-7 days')), 'end' => date('Y-m-d'), 'display' => '7 Hari Terakhir'];
     }
-    return ['start' => $startDate, 'end' => $endDate, 'display' => $periodDisplay];
 }
 
 // --- Logika Utama ---
