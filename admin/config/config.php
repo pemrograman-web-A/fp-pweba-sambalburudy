@@ -5,7 +5,7 @@
 define('DB_SERVER', 'localhost');
 define('DB_USERNAME', 'root');   // GANTI dengan username database Anda
 define('DB_PASSWORD', '');       // GANTI dengan password database Anda
-define('DB_NAME', 'bu_rudy_admin'); // GANTI dengan nama database yang Anda buat
+define('DB_NAME', 'db_burudy'); // GANTI dengan nama database yang Anda buat
 
 // Membuat koneksi MySQLi
 $conn = new mysqli(DB_SERVER, DB_USERNAME, DB_PASSWORD, DB_NAME);
