@@ -184,7 +184,7 @@ if (isset($_SESSION['role'])) {
           <div
             class="relative rounded-3xl overflow-hidden shadow-2xl bg-white p-2 fade-in-section">
             <img
-              src="assets/images/images/Sambal Bawang(tutup kuning).webp"
+              src="images/logo-bu-rudy.png"
               alt="Paket Sambal Bu Rudy Lengkap"
               class="w-full h-auto object-cover rounded-2xl transform transition hover:scale-105 duration-700"
               loading="eager" />
