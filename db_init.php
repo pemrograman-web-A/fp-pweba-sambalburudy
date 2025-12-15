@@ -183,7 +183,7 @@ try {
 
     // Insert sample data
     $insertData = [
-        INSERT INTO `products` (`product_id`, `name`, `description`, `price`, `stock`, `image`, `category`) VALUES
+        "INSERT INTO `products` (`product_id`, `name`, `description`, `price`, `stock`, `image`, `category`) VALUES
         ('BR001', 'Sambal Bawang (Tutup Kuning)', 'Pedas nendang, tutup kuning legendaris.', 28000, 450, 'Sambal Bawang(tutup kuning).webp', 'Sambal'),
         ('BR002', 'Udang Crispy (Toples Tabung)', 'Udang renyah kemasan tabung.', 100000, 25, 'Udang Crispy(toples tabung).webp', 'Lauk'),
         ('BR003', 'Spikoe Tanpa Kismis', 'Lapis Surabaya original lembut.', 125000, 320, 'spikoe tanpa kismis.webp', 'Kue'),
@@ -192,8 +192,8 @@ try {
         ('BR006', 'Otaji Oseng Tuna Asap', 'Tuna asap pedas (500gr).', 85000, 75, 'Oseng Tuna Asap Otaji (1).webp', 'Lauk'),
         ('BR007', 'Almond Crispy Wisata Rasa', 'Camilan tipis super renyah.', 65000, 60, 'Almond Crispy Wisata Rasa.png', 'Cemilan'),
         ('BR008', 'Keripik Singkong Lumba-Lumba', 'Keripik singkong manis empuk.', 35000, 100, 'Keripik Singkong Manis Lumba Lumba.png', 'Cemilan'),
-        ('BR009', 'Spikoe Resep Kuno', 'Varian resep kuno spesial.', 125000, 50, 'spikoe resep kuno.jpg', 'Kue');
-                
+        ('BR009', 'Spikoe Resep Kuno', 'Varian resep kuno spesial.', 125000, 50, 'spikoe resep kuno.jpg', 'Kue')",
+            
         "INSERT INTO `settings` VALUES
         ('nomor_telepon_cs', '08123456789'),
         ('slogan_utama', 'Pedasnya Bikin Nagih!')",
