@@ -6,15 +6,9 @@ $pass = getenv('MYSQLPASSWORD') ?: "";
 $db   = getenv('MYSQLDATABASE') ?: "db_burudy";
 $port = getenv('MYSQLPORT') ?: 3306;
 
-// Menyiapkan DSN untuk PDO
-$dsn = "mysql:host=$host;dbname=$db;port=$port";
-try {
-    // Membuat koneksi menggunakan PDO
-    $conn = new PDO($dsn, $user, $pass);
-    // Menyeting mode error ke exception
-    $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    echo "Connected successfully"; 
-} catch (PDOException $e) {
-    die("Connection failed: " . $e->getMessage());
+$conn = new mysqli($host, $user, $pass, $db, $port);
+
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
 }
 ?>

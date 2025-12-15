@@ -23,13 +23,13 @@ if (isset($_POST['login'])) {
     }
 
     // 2. Cek User Biasa (Prepared Statement - AMAN)
-    $stmt = $conn->prepare("SELECT id, name, password, role FROM users WHERE email = :email");
-    $stmt->bindValue(':email', $email, PDO::PARAM_STR);
+    $stmt = $conn->prepare("SELECT id, name, password, role FROM users WHERE email = ?");
+    $stmt->bind_param('s', $email);
     $stmt->execute();
-    $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    $result = $stmt->get_result();
 
-    if ($result) {
-        $row = $result[0]; // Mengambil baris pertama
+    if ($result->num_rows > 0) {
+        $row = $result->fetch_assoc(); // Mengambil baris pertama
         if (password_verify($password, $row['password'])) {
             $_SESSION['user_id'] = $row['id'];
             $_SESSION['name'] = $row['name'];

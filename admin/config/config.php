@@ -1,10 +1,11 @@
 <?php
-define('DB_SERVER', 'localhost');
-define('DB_USERNAME', 'root');   // GANTI dengan username database Anda
-define('DB_PASSWORD', '');       // GANTI dengan password database Anda
-define('DB_NAME', 'db_burudy');  // GANTI dengan nama database yang Anda buat
+$host = getenv('MYSQLHOST') ?: "localhost";
+$user = getenv('MYSQLUSER') ?: "root";
+$pass = getenv('MYSQLPASSWORD') ?: "";
+$db   = getenv('MYSQLDATABASE') ?: "db_burudy";
+$port = getenv('MYSQLPORT') ?: 3306;
 
-$conn = mysqli_connect(DB_SERVER, DB_USERNAME, DB_PASSWORD, DB_NAME);
+$conn = new mysqli($host, $user, $pass, $db, $port);
 
 // Mengecek koneksi
 if (mysqli_connect_errno()) {
