@@ -114,13 +114,13 @@ $cart_count = isset($_SESSION['cart']) ? count($_SESSION['cart']) : 0;
                             </div>
                             
                             <div class="flex gap-2">
-                                <button onclick="addToCart(<?= $product['id'] ?>)" 
+                                <button onclick="addToCart(<?= $product['product_id'] ?>)" 
                                         class="bg-gray-200 hover:bg-gray-300 text-gray-700 p-2 rounded-lg transition" 
                                         title="Tambah ke Keranjang">
                                     <i class="fas fa-cart-plus"></i>
                                 </button>
                                 
-                                <button onclick="addToCart(<?= $product['id'] ?>, true)" 
+                                <button onclick="addToCart(<?= $product['product_id'] ?>, true)" 
                                         class="bg-burudy-red hover:bg-red-800 text-white px-4 py-2 rounded-lg text-sm font-semibold transition shadow-md">
                                     Beli Sekarang
                                 </button>
