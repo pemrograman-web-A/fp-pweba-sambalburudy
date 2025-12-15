@@ -105,7 +105,7 @@
                 </div>
                 <div class="flex items-center space-x-4">
                     <a href="#" class="text-gray-300 hover:text-burudy-gold transition"><i class="fas fa-bell"></i> Notifikasi</a>
-                    <a href="/fp/logout.php" class="bg-burudy-red text-white px-3 py-1 rounded-full text-sm font-medium hover:bg-red-800 transition">Logout</a>
+                    <a href="../logout.php" class="bg-burudy-red text-white px-3 py-1 rounded-full text-sm font-medium hover:bg-red-800 transition">Logout</a>
                 </div>
             </div>
         </div>
