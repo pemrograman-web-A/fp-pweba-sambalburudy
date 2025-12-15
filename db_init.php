@@ -183,14 +183,17 @@ try {
 
     // Insert sample data
     $insertData = [
-        "INSERT INTO `products` (`product_id`, `name`, `description`, `price`, `stock`, `category`) VALUES
-        ('BR001', 'Sambal Bawang Bu Rudy (Tutup Kuning)', 'Sambal bawang legendaris khas Surabaya.', 25000, 150, 'Sambal'),
-        ('BR002', 'Sambal Terasi Bajak (Tutup Merah)', 'Sambal terasi dengan rasa manis gurih.', 28000, 100, 'Sambal'),
-        ('BR003', 'Sambal Ijo (Tutup Hijau)', 'Sambal cabai hijau dengan ikan peda.', 28000, 80, 'Sambal'),
-        ('BR004', 'Udang Crispy Kecil', 'Udang goreng tepung renyah.', 35000, 200, 'Lauk'),
-        ('BR005', 'Udang Crispy Besar', 'Udang goreng tepung ukuran besar.', 65000, 50, 'Lauk'),
-        ('BR006', 'Almond Crispy Cheese', 'Cemilan tipis renyah taburan almond.', 55000, 45, 'Cemilan')",
-        
+        INSERT INTO `products` (`product_id`, `name`, `description`, `price`, `stock`, `image`, `category`) VALUES
+        ('BR001', 'Sambal Bawang (Tutup Kuning)', 'Pedas nendang, tutup kuning legendaris.', 28000, 450, 'Sambal Bawang(tutup kuning).webp', 'Sambal'),
+        ('BR002', 'Udang Crispy (Toples Tabung)', 'Udang renyah kemasan tabung.', 100000, 25, 'Udang Crispy(toples tabung).webp', 'Lauk'),
+        ('BR003', 'Spikoe Tanpa Kismis', 'Lapis Surabaya original lembut.', 125000, 320, 'spikoe tanpa kismis.webp', 'Kue'),
+        ('BR004', 'Sambal Bawang Sachet (Box)', 'Kemasan travel friendly isi praktis.', 37000, 100, 'Sambal Bawang Sachet Bu Rudy (1).webp', 'Sambal'),
+        ('BR005', 'Spikoe Kismis', 'Lapis Surabaya klasik dengan kismis.', 125000, 50, 'spikoe kismis.webp', 'Kue'),
+        ('BR006', 'Otaji Oseng Tuna Asap', 'Tuna asap pedas (500gr).', 85000, 75, 'Oseng Tuna Asap Otaji (1).webp', 'Lauk'),
+        ('BR007', 'Almond Crispy Wisata Rasa', 'Camilan tipis super renyah.', 65000, 60, 'Almond Crispy Wisata Rasa.png', 'Cemilan'),
+        ('BR008', 'Keripik Singkong Lumba-Lumba', 'Keripik singkong manis empuk.', 35000, 100, 'Keripik Singkong Manis Lumba Lumba.png', 'Cemilan'),
+        ('BR009', 'Spikoe Resep Kuno', 'Varian resep kuno spesial.', 125000, 50, 'spikoe resep kuno.jpg', 'Kue');
+                
         "INSERT INTO `settings` VALUES
         ('nomor_telepon_cs', '08123456789'),
         ('slogan_utama', 'Pedasnya Bikin Nagih!')",
