@@ -22,8 +22,7 @@ if (isset($_POST['register'])) {
         $insert->bind_param("sss", $name, $email, $hashed_password);
         
         if ($insert->execute()) {
-            #echo "<script>alert('Pendaftaran Berhasil! Silakan Login.'); window.location='login.php';</script>";
-            header("Location: login.php");
+            echo "<script>alert('Pendaftaran Berhasil! Silakan Login.'); window.location='login.php';</script>";
             exit;
         } else {
             $error = "Gagal mendaftar: " . $conn->error;
