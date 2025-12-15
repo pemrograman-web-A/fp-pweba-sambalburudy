@@ -23,6 +23,7 @@ if (isset($_POST['register'])) {
         
         if ($insert->execute()) {
             echo "<script>alert('Pendaftaran Berhasil! Silakan Login.'); window.location='login.php';</script>";
+            header("Location: login.php");
             exit;
         } else {
             $error = "Gagal mendaftar: " . $conn->error;
