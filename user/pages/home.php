@@ -91,7 +91,7 @@ $cart_count = isset($_SESSION['cart']) ? count($_SESSION['cart']) : 0;
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 <?php
                 // Ambil produk dari database
-                $query = "SELECT * FROM products ORDER BY id ASC";
+                $query = "SELECT * FROM products ORDER BY product_id ASC";
                 $result = $conn->query($query);
 
                 if ($result->num_rows > 0) {
