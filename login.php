@@ -93,7 +93,7 @@ error_reporting(E_ALL);
             Belum punya akun? <a href="register.php" class="text-burudy-red font-bold hover:underline">Daftar disini</a>
         </p>
         <p class="mt-2 text-center text-xs text-gray-400">
-            <a href="index.php" class="hover:text-gray-600">&larr; Kembali ke Beranda</a>
+            <a href="index.html" class="hover:text-gray-600">&larr; Kembali ke Beranda</a>
         </p>
     </div>
 </body>
