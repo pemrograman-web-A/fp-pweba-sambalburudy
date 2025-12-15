@@ -53,7 +53,7 @@ try {
         `description` TEXT,
         `price` DECIMAL(10,2) NOT NULL,
         `stock` INT NOT NULL,
-        `image` VARCHAR(255) NOT NULL,
+        `image` VARCHAR(255),
         `category` VARCHAR(50) DEFAULT 'Lainnya',
         PRIMARY KEY (`product_id`)
     )";
