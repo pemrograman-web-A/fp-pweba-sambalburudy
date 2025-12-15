@@ -2,8 +2,8 @@
 session_start();
 require 'config/database.php'; 
 
+// Redirect jika sudah login
 if (isset($_SESSION['role'])) {
-    // Redirect jika user iseng buka halaman login padahal sudah login
     if ($_SESSION['role'] == 'admin') header("Location: admin/pages/admin.php");
     else header("Location: user/pages/home.php");
     exit;
@@ -18,34 +18,37 @@ if (isset($_POST['login'])) {
         $_SESSION['user_id'] = 0;
         $_SESSION['name'] = 'Admin Bu Rudy';
         $_SESSION['role'] = 'admin';
-        header("Location: admin/pages/admin.php"); // Path Admin Baru
+        header("Location: admin/pages/admin.php");
         exit;
     }
 
     // 2. Cek User Biasa (Prepared Statement - AMAN)
-    $stmt = $conn->prepare("SELECT id, name, password, role FROM users WHERE email = ?");
-    $stmt->bind_param("s", $email);
+    $stmt = $conn->prepare("SELECT id, name, password, role FROM users WHERE email = :email");
+    $stmt->bindValue(':email', $email, PDO::PARAM_STR);
     $stmt->execute();
-    $result = $stmt->get_result();
+    $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    if ($result->num_rows === 1) {
-        $row = $result->fetch_assoc();
+    if ($result) {
+        $row = $result[0]; // Mengambil baris pertama
         if (password_verify($password, $row['password'])) {
             $_SESSION['user_id'] = $row['id'];
             $_SESSION['name'] = $row['name'];
             $_SESSION['role'] = $row['role'];
 
-            // Redirect ke Folder User Baru
+            // Redirect berdasarkan role
             if ($row['role'] == 'admin') {
                 header("Location: admin/pages/admin.php");
             } else {
-                header("Location: user/pages/home.php"); 
+                header("Location: user/pages/home.php");
             }
             exit;
         }
     }
     $error = "Email atau Password salah!";
 }
+
+ini_set('display_errors', 1);
+error_reporting(E_ALL);
 ?>
 
 <!DOCTYPE html>
